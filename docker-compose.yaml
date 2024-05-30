@@ -1,0 +1,43 @@
+name: bibliotheksverwaltung
+
+services:
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: Bibliotheksverwaltung
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER_FILE: /run/secrets/postgres-admin-username
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-admin-password
+    ports:
+      - 5432:5432
+    secrets:
+      - postgres-admin-username
+      - postgres-admin-password
+    restart: unless-stopped
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+
+  pgadmin:
+    image: dpage/pgadmin4:8.7
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - 5050:80
+    restart: unless-stopped
+    volumes:
+     - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+secrets:
+  postgres-admin-username:
+    file: ./postgres_user.txt
+  postgres-admin-password:
+    file: ./postgres_password.txt
+
+volumes:
+  pg_data:
+  pgadmin_data:
