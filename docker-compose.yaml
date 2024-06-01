@@ -3,9 +3,10 @@ name: bibliotheksverwaltung
 services:
 
   postgres:
-    image: postgres
+    build: .
     environment:
       POSTGRES_DB: Bibliotheksverwaltung
+      POSTGRES_INITDB_ARGS: "--locale=de_DE.UTF-8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=de_DE.UTF-8 --lc-numeric=de_DE.UTF-8 --lc-time=de_DE.UTF-8"
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER_FILE: /run/secrets/postgres-admin-username
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-admin-password
@@ -34,9 +35,9 @@ services:
 
 secrets:
   postgres-admin-username:
-    file: ./postgres_user.txt
+    file: ./secrets/postgres_user.txt
   postgres-admin-password:
-    file: ./postgres_password.txt
+    file: ./secrets/postgres_password.txt
 
 volumes:
   pg_data:
