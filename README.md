@@ -1,93 +1,142 @@
-# development-docker-compose
+# Development Docker Compose Setup
 
+This repository contains a Docker Compose configuration to set up a development environment with PostgreSQL and pgAdmin. It uses `docker-compose` for service management, `secrets` for storing sensitive data, and `.env` for configuring environment variables.
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+## Directory Structure
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/typhooncode/general/development-docker-compose.git
-git branch -M main
-git push -uf origin main
+development-docker-compose/
+│
+├── docker-compose.yml          # Docker Compose file
+├── Dockerfile                  # Dockerfile for the PostgreSQL container
+├── secrets/
+│   ├── postgres_user.txt       # Contains the PostgreSQL username
+│   └── postgres_password.txt   # Contains the PostgreSQL password
+└── .env                        # Contains environment variables for pgAdmin
 ```
 
-## Integrate with your tools
+## Preparation
 
-- [ ] [Set up project integrations](https://gitlab.com/typhooncode/general/development-docker-compose/-/settings/integrations)
+1. **Configure PostgreSQL Credentials:**
+   
+   Create two files in the `secrets/` directory:
+   
+   - **`postgres_user.txt`**: Contains the PostgreSQL username.
+   - **`postgres_password.txt`**: Contains the PostgreSQL password.
+   
+   The content of these files should be the username and password in plain text.
 
-## Collaborate with your team
+   Example:
+   ```
+   secrets/postgres_user.txt: someusername
+   secrets/postgres_password.txt: password
+   ```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
 
-## Test and Deploy
+2. **Configure pgAdmin Credentials:**
 
-Use the built-in continuous integration in GitLab.
+Create a `.env` file in the root directory containing the pgAdmin credentials:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+`.env`:
+```env
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=my_pgadmin_password
+```
 
-***
+## Docker Compose Setup
 
-# Editing this README
+This `docker-compose.yml` file currently starts **two core services** essential for the development environment:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- **PostgreSQL**: A PostgreSQL database with the following settings:
+  - Database name: `Bibliotheksverwaltung`
+  - Locale settings: `de_DE.UTF-8`
+  - Credentials are read from the secrets files.
 
-## Suggestions for a good README
+- **pgAdmin**: A web-based PostgreSQL management interface.
+  - Credentials are read from the `.env` file.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Locale Settings
 
-## Name
-Choose a self-explaining name for your project.
+In the PostgreSQL service, the following locale settings have been configured to ensure that the database handles German-specific formats correctly:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+- **`lc_collate=de_DE.UTF-8`**: Defines the collation order (sorting rules) for strings.
+- **`lc_ctype=de_DE.UTF-8`**: Specifies the character classification (e.g., upper, lower, digit).
+- **`lc_monetary=de_DE.UTF-8`**: Sets the default format for currency.
+- **`lc_numeric=de_DE.UTF-8`**: Determines the format for numbers (e.g., decimal points).
+- **`lc_time=de_DE.UTF-8`**: Sets the format for time and date.
+- **`lc_messages=en_US.UTF-8`**: While German locales are set, system messages are configured in English for broader accessibility.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+These settings are chosen based on my personal preference and familiarity with the German locale. However, you can configure the locale settings according to your own needs. For more information on how to configure these settings, refer to the [PostgreSQL Locales documentation](https://www.postgresql.org/docs/current/locale.html).
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Docker Compose File
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```yaml
+version: '3.8'
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+services:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+  postgres:
+    build: .
+    environment:
+      POSTGRES_DB: Bibliotheksverwaltung
+      POSTGRES_INITDB_ARGS: "--locale=de_DE.UTF-8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=de_DE.UTF-8 --lc-numeric=de_DE.UTF-8 --lc-time=de_DE.UTF-8"
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER_FILE: /run/secrets/postgres-admin-username
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-admin-password
+    ports:
+      - 5432:5432
+    secrets:
+      - postgres-admin-username
+      - postgres-admin-password
+    restart: unless-stopped
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ../datalayer/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+  pgadmin:
+    image: dpage/pgadmin4:8.7
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - 5050:80
+    restart: unless-stopped
+    volumes:
+     - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+secrets:
+  postgres-admin-username:
+    file: ./secrets/postgres_user.txt
+  postgres-admin-password:
+    file: ./secrets/postgres_password.txt
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+volumes:
+  pg_data:
+  pgadmin_data:
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Dockerfile
 
-## License
-For open source projects, say how it is licensed.
+The current setup utilizes a custom `Dockerfile` to enhance the PostgreSQL container with additional locale support. This is an essential part of the foundation, ensuring that the database is properly configured for the environment. As the project evolves, this Dockerfile may be expanded to include additional configurations or optimizations to support future development needs. This setup is currently tailored to meet the immediate requirements of the project, but is flexible enough to accommodate further enhancements as the project continues to grow and develop.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```Dockerfile
+FROM postgres:latest
+
+# Install locale and locales package
+RUN apt-get update && apt-get install -y locales
+
+# Add the desired locales to /etc/locale.gen
+RUN echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen && \
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+
+# Generate the locales
+RUN locale-gen
+```
+
+
+
+
+
+
