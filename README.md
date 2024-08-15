@@ -1,5 +1,21 @@
 # Development Docker Compose Setup
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Directory Structure](#directory-structure)
+- [Docker Compose Setup](#docker-compose-setup)
+  - [Locale Settings](#locale-settings)
+  - [Docker Compose File](#docker-compose-file)
+  - [Initial Database Setup with init.sql](#initial-database-setup-with-initsql)
+  - [Data Persistence with pg_data](#data-persistence-with-pg_data)
+- [Usage](#usage)
+  - [Start the Services](#start-the-services)
+  - [Access pgAdmin](#access-pgadmin)
+  - [Connect to the Database](#connect-to-the-database)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
+# Introduction
 This repository contains a Docker Compose configuration to set up a development environment with PostgreSQL and pgAdmin. It uses `docker-compose` for service management, `secrets` for storing sensitive data, and `.env` for configuring environment variables.
 
 ## Directory Structure
@@ -133,6 +149,24 @@ RUN echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen && \
 
 # Generate the locales
 RUN locale-gen
+```
+
+### Initial Database Setup with `init.sql`
+The init.sql file plays a crucial role in the initial setup of the database. It contains the SQL commands needed to create the necessary tables, indexes, and initial configurations for the project. This script is automatically executed when the PostgreSQL container is first started, ensuring that the database is correctly initialized and ready for use right from the beginning.
+
+You can find the init.sql in the datalayer directory, which is mounted into the PostgreSQL container via the docker-compose.yml file:
+
+```yaml
+volumes:
+  - ../datalayer/init.sql:/docker-entrypoint-initdb.d/init.sql
+```
+
+### Data Persistence with `pg_data`
+To ensure that your database data is not lost when the Docker containers are stopped or restarted, a named volume pg_data is used. This volume stores the PostgreSQL data files on your host machine, making the data persistent across container lifecycles.
+Here is how it’s configured in the `docker-compose.yml`:
+```yaml
+volumes:
+  pg_data:/var/lib/postgresql/data
 ```
 
 ## Usage
