@@ -47,12 +47,12 @@ PGADMIN_DEFAULT_PASSWORD=my_pgadmin_password
 This `docker-compose.yml` file currently starts **two core services** essential for the development environment:
 
 - **PostgreSQL**: A PostgreSQL database with the following settings:
-  - Database name: `Bibliotheksverwaltung`
-  - Locale settings: `de_DE.UTF-8`
-  - Credentials are read from the secrets files.
+  - **Database name**: `Bibliotheksverwaltung`
+  - **Locale settings**: Configured specifically for German locale `de_DE.UTF-8`, ensuring proper handling of German-specific data formats and collations.
+  - **Credentials**: Managed securely through Docker secrets.
 
 - **pgAdmin**: A web-based PostgreSQL management interface.
-  - Credentials are read from the `.env` file.
+  - **Credentials**: Configured via environment variables stored in a `.env` file.
 
 ### Locale Settings
 
