@@ -135,6 +135,28 @@ RUN echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen && \
 RUN locale-gen
 ```
 
+## Usage
+
+### Start the Services
+
+To start the PostgreSQL and pgAdmin services, run following command in the terminal:
+
+```zsh
+docker-compose up
+```
+
+### Access pgAdmin
+Open a browser and go to http://localhost:5050. Log in using the credentials specified in the `.env` file.
+
+### Connect to the Database
+In pgAdmin, you can now add a new server to connect to the PostgreSQL database:
+
+- Host name/address: postgres
+- Port: 5432
+- Maintenance database: Bibliotheksverwaltung
+- Username: The value from postgres_user.txt.
+- Password: The value from postgres_password.txt.
+
 
 
 
