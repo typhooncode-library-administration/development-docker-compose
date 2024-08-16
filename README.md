@@ -7,7 +7,9 @@
   - [Locale Settings](#locale-settings)
   - [Docker Compose File](#docker-compose-file)
   - [Initial Database Setup with init.sql](#initial-database-setup-with-initsql)
+  - [Data Insertion with insert.sql](#data-insertion-with-insertsql)
   - [Data Persistence with pg_data](#data-persistence-with-pg_data)
+  - [Data Persistence with pgadmin_data](#data-persistence-with-pgadmin_data)
 - [Usage](#usage)
   - [Start the Services](#start-the-services)
   - [Access pgAdmin](#access-pgadmin)
@@ -113,9 +115,10 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ../datalayer/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../datalayer/insert.sql:/docker-entrypoint-initdb.d/insert.sql
 
   pgadmin:
-    image: dpage/pgadmin4:8.7
+    image: dpage/pgadmin4:8.10
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
@@ -166,6 +169,18 @@ volumes:
 ```
 If you move the `init.sql` file to a different directory, make sure to update the corresponding path in the `docker-compose.yml` file to reflect its new location.
 
+### Data Insertion with `insert.sql`
+The `insert.sql` file is used to populate the database with initial data, such as predefined values, example entries, or essential records that the application requires to function correctly. This script is automatically executed after the database structure has been created by the `init.sql` file, ensuring that the tables are not only created but also populated with necessary data right from the start.
+
+In the `docker-entrypoint-initdb.d` directory, SQL files are executed in alphabetical order. This means that the `init.sql` file, which creates the database structure, should be named in a way that it precedes the `insert.sql` file, which populates the database. By naming your files appropriately, you ensure that the database schema is in place before any data is inserted.
+
+The location of the `insert.sql` file is flexible and can be adjusted according to your project’s directory structure. In the `docker-compose.yml` file, you can specify the path where this file is located. In this project, the location is defined as follows:
+```yaml
+volumes:
+  - ../datalayer/insert.sql:/docker-entrypoint-initdb.d/insert.sql
+```
+If you move the `insert.sql` file to a different directory, make sure to update the corresponding path in the `docker-compose.yml` file to reflect its new location. This will ensure that the data insertion process runs smoothly and your database is populated as expected during the initial setup.
+
 ### Data Persistence with `pg_data`
 To ensure that your database data is not lost when the Docker containers are stopped or restarted, a named volume pg_data is used. This volume stores the PostgreSQL data files on your host machine, making the data persistent across container lifecycles.
 Here is how it’s configured in the `docker-compose.yml`:
@@ -174,6 +189,16 @@ volumes:
   pg_data:/var/lib/postgresql/data
 ```
 The location where the data is stored on the host machine can also be customized. If you prefer to store the database files in a different location, you can adjust the path in the `docker-compose.yml` file accordingly. Just replace `pg_data` with the desired path, ensuring that your data remains persistent in the location of your choice.
+
+### Data Persistence with `pgadmin_data`
+pgAdmin is a popular open-source management tool for PostgreSQL, providing a graphical interface to manage databases, run queries, and handle various administrative tasks. To ensure that your pgAdmin configurations—such as server connections, user settings, and other preferences—are not lost when the Docker container is stopped or restarted, a named volume `pgadmin_data` is used. This volume stores the pgAdmin configuration and data files on your host machine, making the settings and preferences persistent across container lifecycles.
+
+Here is how it’s configured in the `docker-compose.yml`:
+```yaml
+volumes:
+  pgadmin_data:/var/lib/pgadmin
+```
+The location where the pgAdmin data is stored on the host machine can also be customized. If you prefer to store the pgAdmin files in a different location, you can adjust the path in the `docker-compose.yml` file accordingly. Just replace `pgadmin_data` with the desired path, ensuring that your pgAdmin settings and configurations remain persistent in the location of your choice.
 
 ## Usage
 
