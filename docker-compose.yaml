@@ -1,12 +1,11 @@
 name: bibliotheksverwaltung
 
 services:
-
   postgres:
     build: .
     environment:
       POSTGRES_DB: Bibliotheksverwaltung
-      POSTGRES_INITDB_ARGS: "--locale=de_DE.UTF-8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=de_DE.UTF-8 --lc-numeric=de_DE.UTF-8 --lc-time=de_DE.UTF-8"
+      POSTGRES_INITDB_ARGS: '--locale=de_DE.UTF-8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=de_DE.UTF-8 --lc-numeric=de_DE.UTF-8 --lc-time=de_DE.UTF-8'
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER_FILE: /run/secrets/postgres-admin-username
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-admin-password
@@ -18,10 +17,11 @@ services:
     restart: unless-stopped
     volumes:
       - pg_data:/var/lib/postgresql/data
-
+      - ../datalayer/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../datalayer/insert.sql:/docker-entrypoint-initdb.d/insert.sql
 
   pgadmin:
-    image: dpage/pgadmin4:8.7
+    image: dpage/pgadmin4:8.10
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
@@ -29,7 +29,7 @@ services:
       - 5050:80
     restart: unless-stopped
     volumes:
-     - pgadmin_data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
 
