@@ -229,6 +229,7 @@ Replace <container_name> with the actual name of the PostgreSQL container (e.g.,
   ]
 }
 ```
+For more information on how to configure the, refer to [Docker.docks - Healthcheck Documentation](https://docs.docker.com/reference/dockerfile/#healthcheck).
 
 **Future Considerations:**
 
