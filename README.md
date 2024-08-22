@@ -8,6 +8,7 @@
   - [Docker Compose File](#docker-compose-file)
   - [Initial Database Setup with init.sql](#initial-database-setup-with-initsql)
   - [Data Insertion with insert.sql](#data-insertion-with-insertsql)
+  - [Healthcheck_for_PostgreSQL](#healthcheck-for-PostgreSQL)
   - [Data Persistence with pg_data](#data-persistence-with-pg_data)
   - [Data Persistence with pgadmin_data](#data-persistence-with-pgadmin_data)
 - [Usage](#usage)
@@ -73,6 +74,7 @@ This `docker-compose.yml` file currently starts **two core services** essential 
   - **Database name**: `Bibliotheksverwaltung`
   - **Locale settings**: Configured specifically for German locale `de_DE.UTF-8`, ensuring proper handling of German-specific data formats and collations.
   - **Credentials**: Managed securely through Docker secrets.
+  - **Healthcheck**: A health check is configured to ensure the PostgreSQL service is running and healthy. This check periodically verifies if the service is up and accepting connections.
 
 - **pgAdmin**: A web-based PostgreSQL management interface.
   - **Credentials**: Configured via environment variables stored in a `.env` file.
@@ -94,15 +96,14 @@ These settings are chosen based on my personal preference and familiarity with t
 ### Docker Compose File
 
 ```yaml
-version: '3.8'
+name: bibliotheksverwaltung
 
 services:
-
   postgres:
     build: .
     environment:
       POSTGRES_DB: Bibliotheksverwaltung
-      POSTGRES_INITDB_ARGS: "--locale=de_DE.UTF-8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=de_DE.UTF-8 --lc-numeric=de_DE.UTF-8 --lc-time=de_DE.UTF-8"
+      POSTGRES_INITDB_ARGS: '--locale=de_DE.UTF-8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=de_DE.UTF-8 --lc-numeric=de_DE.UTF-8 --lc-time=de_DE.UTF-8'
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER_FILE: /run/secrets/postgres-admin-username
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-admin-password
@@ -116,6 +117,15 @@ services:
       - pg_data:/var/lib/postgresql/data
       - ../datalayer/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ../datalayer/insert.sql:/docker-entrypoint-initdb.d/insert.sql
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'PGPASSWORD=$(cat /run/secrets/postgres-admin-password) pg_isready -U $(cat /run/secrets/postgres-admin-username) -d Bibliotheksverwaltung -h localhost',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:8.10
@@ -126,7 +136,7 @@ services:
       - 5050:80
     restart: unless-stopped
     volumes:
-     - pgadmin_data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
 
@@ -180,6 +190,49 @@ volumes:
   - ../datalayer/insert.sql:/docker-entrypoint-initdb.d/insert.sql
 ```
 If you move the `insert.sql` file to a different directory, make sure to update the corresponding path in the `docker-compose.yml` file to reflect its new location. This will ensure that the data insertion process runs smoothly and your database is populated as expected during the initial setup.
+
+### Healthcheck for PostgreSQL
+To ensure the PostgreSQL service is running and healthy, a health check has been added to the `docker-compose.yml` file. This health check periodically checks if the PostgreSQL service is up and accepting connections. If the service is not healthy, Docker will indicate this, allowing for troubleshooting before other dependent services are affected.
+
+**Healthcheck Configuration:**
+```yaml
+services:
+  postgres:
+    # Other configurations...
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'PGPASSWORD=$(cat /run/secrets/postgres-admin-password) pg_isready -U $(cat /run/secrets/postgres-admin-username) -d Bibliotheksverwaltung -h localhost',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # Other configurations...
+```
+**How to Monitor Healthcheck Status:**
+
+You can monitor the status of the health check by using the following Docker command:
+```zsh
+docker inspect --format='{{json .State.Health}}' <container_name>
+```
+Replace <container_name> with the actual name of the PostgreSQL container (e.g., bibliotheksverwaltung-postgres-1).
+
+**Example output:**
+```json
+{
+  "Status": "healthy",
+  "FailingStreak": 0,
+  "Log": [
+    {"Start": "2024-08-22T19:06:53.715596093Z", "End": "2024-08-22T19:06:53.762015676Z", "ExitCode": 0, "Output": "localhost:5432 - accepting connections\n"},
+    {"Start": "2024-08-22T19:07:23.763110093Z", "End": "2024-08-22T19:07:23.808482593Z", "ExitCode": 0, "Output": "localhost:5432 - accepting connections\n"}
+  ]
+}
+```
+
+**Future Considerations:**
+
+As the project grows and more services are added, relying solely on basic health checks may become insufficient for ensuring the overall health and performance of the system. In the future, implementing a comprehensive monitoring tool like Prometheus, Grafana, or ELK Stack could provide more detailed insights into service performance, resource usage, and potential issues. This would help maintain the stability and reliability of the entire system as it scales.
 
 ### Data Persistence with `pg_data`
 To ensure that your database data is not lost when the Docker containers are stopped or restarted, a named volume pg_data is used. This volume stores the PostgreSQL data files on your host machine, making the data persistent across container lifecycles.
