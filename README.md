@@ -8,7 +8,7 @@
   - [Docker Compose File](#docker-compose-file)
   - [Initial Database Setup with init.sql](#initial-database-setup-with-initsql)
   - [Data Insertion with insert.sql](#data-insertion-with-insertsql)
-  - [Healthcheck_for_PostgreSQL](#healthcheck-for-PostgreSQL)
+  - [Healthcheck for PostgreSQL](#healthcheck-for-PostgreSQL)
   - [Data Persistence with pg_data](#data-persistence-with-pg_data)
   - [Data Persistence with pgadmin_data](#data-persistence-with-pgadmin_data)
 - [Usage](#usage)
