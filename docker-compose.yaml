@@ -19,6 +19,15 @@ services:
       - pg_data:/var/lib/postgresql/data
       - ../datalayer/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ../datalayer/insert.sql:/docker-entrypoint-initdb.d/insert.sql
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'PGPASSWORD=$(cat /run/secrets/postgres-admin-password) pg_isready -U $(cat /run/secrets/postgres-admin-username) -d Bibliotheksverwaltung -h localhost',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:8.10
